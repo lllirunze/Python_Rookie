@@ -3,7 +3,7 @@ FilePath: game.py
 Author: LiRunze
 Date: 2022-08-23 20:31:46
 LastEditors: LiRunze
-LastEditTime: 2022-08-28 08:09:28
+LastEditTime: 2022-08-28 08:11:59
 Description: 
 '''
 
@@ -226,6 +226,7 @@ class Game2048(object):
 
     # 向下移动
     def MoveDown(self):
+        
 
     # 向左移动
     def MoveLeft(self):

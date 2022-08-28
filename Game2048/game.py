@@ -3,7 +3,7 @@ FilePath: game.py
 Author: LiRunze
 Date: 2022-08-23 20:31:46
 LastEditors: LiRunze
-LastEditTime: 2022-08-28 02:15:33
+LastEditTime: 2022-08-28 08:09:28
 Description: 
 '''
 
@@ -101,6 +101,7 @@ class Game2048(object):
         self.tips_font      = ''    # 说明字体类型及大小
         self.font           = ''    # 数字字体
 
+
     # 窗口的设置
     def Form(self):
         """
@@ -119,6 +120,7 @@ class Game2048(object):
             self.Action()           # 用户行为：按键/鼠标
             self.Paint()            # 表格绘制
             pygame.display.update()
+
 
     # 用户行为：按键/鼠标
     def Action(self):
@@ -144,6 +146,7 @@ class Game2048(object):
                 if event.key == pygame.K_RIGHT and self.is_over == False:
                     self.MoveRight()
 
+
     # 游戏初始化
     def InitGame(self):
         
@@ -157,14 +160,69 @@ class Game2048(object):
             self.isadd = True
             self.CreateNum()
 
+
     # 随机在一个位置生成一个数
     def CreateNum(self):
 
+        list = self.GetEmpty()
+        if list and self.isadd:
+            '''
+            随机出现数字
+            2, 4出现概率3:1
+            random.randint(m, n): 随机生成[m, n]
+            '''
+            value = 4 if random.randint(0,3)%3==0 else 2
+            # 获取随机位置下标
+            x, y = random.sample(list, 1)[0]
+            # 在随机位置上生成随机数字
+            self.martix[x][y] = value
+            self.isadd = False
+
+
     # 获取空白方格
     def GetEmpty(self):
+        
+        list = []
+        for i in range(4):
+            for j in range(4):
+                if self.martix[i][j] == 0:
+                    list.append([i, j])
+        return list
+
 
     # 向上移动
     def MoveUp(self):
+        '''
+        向上移动，只需要考虑第二行到第四行
+        共分为两种情况:
+        1. 当前数字上边无空格，即上边值为0
+            a. 当前数字与上边数字相等，合并
+            b. 当前数字与上边数字不相等，continue
+        2. 当前数字上边有空格，即上边值为0，上移
+        '''
+        for j in range(4):
+            index = 0
+            for i in range(1, 4):
+                if self.martix[i][j] > 0:
+                    # 当前数字 == 上边数字
+                    self.score             += self.martix[i][j] + self.martix[index][j]
+                    self.martix[index][j]   = self.martix[i][j] + self.martix[index][j]
+                    self.martix[i][j]       = 0
+                    index                  += 1
+                    self.isadd              = True
+                # 当前数字与上边数字不相等，continue可以省略不写
+                elif self.martix[index][j] == 0:
+                    # 当前数字上边有0
+                    self.martix[index][j]   = self.martix[i][j]
+                    self.martix[i][j]       = 0
+                    self.isadd              = True
+                else:
+                    index += 1
+                    if self.martix[index][j] == 0:
+                        self.martix[index][j]   = self.martix[i][j]
+                        self.martix[i][j]       = 0
+                        self.isadd              = True
+
 
     # 向下移动
     def MoveDown(self):

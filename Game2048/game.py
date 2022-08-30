@@ -2,12 +2,15 @@
 FilePath: game.py
 Author: LiRunze
 Date: 2022-08-23 20:31:46
-LastEditors: LiRunze
-LastEditTime: 2022-08-28 08:11:59
+LastEditors: error: git config user.name && git config user.email & please set dead value or install git
+LastEditTime: 2022-08-30 05:34:08
 Description: 
 '''
 
+from email.errors import MultipartInvariantViolationDefect
+from operator import truediv
 import os
+from pickletools import markobject
 import sys
 import numpy
 import random
@@ -204,41 +207,223 @@ class Game2048(object):
             index = 0
             for i in range(1, 4):
                 if self.martix[i][j] > 0:
-                    # 当前数字 == 上边数字
-                    self.score             += self.martix[i][j] + self.martix[index][j]
-                    self.martix[index][j]   = self.martix[i][j] + self.martix[index][j]
-                    self.martix[i][j]       = 0
-                    index                  += 1
-                    self.isadd              = True
-                # 当前数字与上边数字不相等，continue可以省略不写
-                elif self.martix[index][j] == 0:
-                    # 当前数字上边有0
-                    self.martix[index][j]   = self.martix[i][j]
-                    self.martix[i][j]       = 0
-                    self.isadd              = True
-                else:
-                    index += 1
-                    if self.martix[index][j] == 0:
+                    if self.martix[i][j] == self.martix[index][j]:
+                        # 当前数字 == 上边数字
+                        self.score             += self.martix[i][j] + self.martix[index][j]
+                        self.martix[index][j]   = self.martix[i][j] + self.martix[index][j]
+                        self.martix[i][j]       = 0
+                        index                  += 1
+                        self.isadd              = True
+                    # 当前数字与上边数字不相等，continue可以省略不写
+                    elif self.martix[index][j] == 0:
+                        # 当前数字上边有0
                         self.martix[index][j]   = self.martix[i][j]
                         self.martix[i][j]       = 0
                         self.isadd              = True
+                    else:
+                        index += 1
+                        if self.martix[index][j] == 0:
+                            self.martix[index][j]   = self.martix[i][j]
+                            self.martix[i][j]       = 0
+                            self.isadd              = True
 
 
     # 向下移动
     def MoveDown(self):
-        
+        '''
+        向下移动，只需要考虑第一行到第三行
+        共分为两种情况:
+        1. 当前数字下边无空格，即下边值为0
+            a. 当前数字与下边数字相等，合并
+            b. 当前数字与下边数字不相等，continue
+        2. 当前数字下边有空格，即下边值为0，下移
+        '''
+        for j in range(4):
+            index = 3
+            for i in range(2, -1, -1):
+                if self.martix[i][j] > 0:
+                    if self.martix[i][j] == self.martix[index][j]:
+                        self.score             += self.martix[i][j] + self.martix[index][j]
+                        self.martix[index][j]   = self.martix[i][j] + self.martix[index][j]
+                        self.martix[i][j]       = 0
+                        index                  -= 1
+                        self.isadd              = True
+                    elif self.martix[index][j] == 0:
+                        self.martix[index][j]   = self.martix[i][j]
+                        self.martix[i][j]       = 0
+                        self.isadd              = True
+                    else:
+                        index -= 1
+                        if self.martix[index][j] == 0:
+                            self.martix[index][j]   = self.martix[i][j]
+                            self.martix[i][j]       = 0
+                            self.isadd              = True
+                        
 
     # 向左移动
     def MoveLeft(self):
+        """
+        向左移动，只需考虑第二列到第四列
+        共分为两种情况:
+        1、当前数字左边无空格，即左边值不为0
+            a. 当前数字与左边数字相等，合并
+            b. 当前数字与左边数字不相等，continue
+        2、当前数字左边有空格，即左边值为0，左移
+        """
+        for i in range(4):
+            index = 0
+            for j in range(1, 4):
+                if self.martix[i][j] > 0:
+                    if self.martix[i][j] == self.martix[i][index]:
+                        # 当前数字 == 左边数字
+                        self.score             += self.martix[i][j] + self.martix[i][index]
+                        self.martix[i][index]   = self.martix[i][j] + self.martix[i][index]
+                        self.martix[i][j]       = 0
+                        index                  += 1
+                        self.isadd              = True
+                    # 当前数字与左边数字不相等，continue 可以省略不写
+                    elif self.martix[i][index] == 0:
+                        # 当前数字左边有0
+                        self.martix[i][index]   = self.martix[i][j]
+                        self.martix[i][j]       = 0
+                        self.isadd              = True
+                    else:
+                        index += 1
+                        if self.martix[i][index] == 0:
+                            self.martix[i][index]   = self.martix[i][j]
+                            self.martix[i][j]       = 0
+                            self.isadd              = True
+
 
     # 向右移动
     def MoveRight(self):
+        """
+        向右移动，只需考虑第一列到第三列
+        共分为两种情况:
+        1、当前数字右边无空格，即右边值不为 0
+            a. 当前数字与右边数字相等，合并
+            b. 当前数字与右边数字不相等，continue
+        2、当前数字右边有空格，即右边值为 0， 右移
+        """
+        for i in range(4):
+            index = 3
+            for j in range(2, -1, -1):
+                if self.martix[i][j] > 0:
+                    if self.martix[i][j] == self.martix[i][index]:
+                        # 当前数字 == 右边数字
+                        self.score             += self.martix[i][j] + self.martix[i][index]
+                        self.martix[i][index]   = self.martix[i][j] + self.martix[i][index]
+                        self.martix[i][j]       = 0
+                        index                  -= 1
+                        self.isadd              = True
+                    # 当前数字与左边数字不相等，continue 可以省略不写
+                    elif self.martix[i][index] == 0:
+                        # 当前数字右边有0
+                        self.martix[i][index]   = self.martix[i][j]
+                        self.martix[i][j]       = 0
+                        self.isadd              = True
+                    else:
+                        index -= 1
+                        if self.martix[i][index] == 0:
+                            self.martix[i][index]   = self.martix[i][j]
+                            self.martix[i][j]       = 0
+                            self.isadd              = True
+                            
 
     # 判断游戏是否结束
     def JudgeGameOver(self):
+        zerolist = self.GetEmpty()
+        if zerolist:
+            return False
+        
+        for i in range(3):
+            for j in range(3):
+                if self.martix[i][j] == self.martix[i][j+1]:
+                    return False
+                if self.martix[i][j] == self.martix[i+1][j]:
+                    return False
+        if self.martix[3][3] == self.martix[3][2]:
+            return False
+        if self.martix[3][3] == self.martix[2][3]:
+            return False
+        
+        return True
+    
 
     # 判断游戏是否胜利
     def JudgeGameSuccess(self):
+        if self.martix.max() == 2048:
+            return True
+        return False
 
     # 绘制表格
     def Paint(self):
+        '''
+        fill(color):                填充某一种颜色
+        pygame.font.get_fonts():    获取字体样式
+        pygame.font.Font.render():  在一个新的Surface对象上绘制文本
+        '''
+        self.form.fill((220, 220, 220))
+        
+        # 添加标题
+        pygame.font.init()
+        self.title_font = pygame.font.SysFont('幼圆', 50, True)
+        title_text      = self.title_font.render('2048', True, (0,0,0))
+        self.form.blit(title_text, (50,10))
+        
+        # 添加分数
+        pygame.draw.rect(self.form, (128,128,128), (250,0,120,60))
+        self.score_font = pygame.font.SysFont('幼圆', 28, True)
+        score_text      = self.score_font.render('得分', True, (0,0,0))
+        self.form.blit(score_text, (275,0))
+        digital_score   = self.score_font.render(str(int(self.score)), True, (255,250,250))
+        self.form.blit(digital_score, (280,30))
+        
+        # 添加游戏说明
+        self.tips_font  = pygame.font.SysFont('sinsunnsimsun', 20)
+        tips_text       = self.tips_font.render('操作: 上下左右, 按Esc重新开始', True, (0,0,0))
+        self.form.blit(tips_text, (25,70))
+        
+        # 绘制方格
+        for i in range(4):
+            for j in range(4):
+                x = j*self.block_size + (j+1)*self.block_gap
+                y = i*self.block_size + (i+1)*self.block_gap
+                value = int(self.martix[i][j])
+                pygame.draw.rect(self.form, self.block_color[value], (x+5, y+100, self.block_size, self.block_size), border_radius=self.block_arc)
+                
+                # 数字字体即大小
+                if value < 10:
+                    self.font   = pygame.font.SysFont('simsunnsimsun', 46, True)  # 数字2、4、8
+                    value_text  = self.font.render(str(value), True, self.nums_color[value])
+                    self.form.blit(value_text, (x + 35, y + 120))
+                elif value < 100:
+                    self.font   = pygame.font.SysFont('simsunnsimsun', 40, True)  # 数字16, 32, 64
+                    value_text  = self.font.render(str(value), True, self.nums_color[value])
+                    self.form.blit(value_text, (x + 25, y + 120))
+                elif value < 1000:
+                    self.font   = pygame.font.SysFont('simsunnsimsun', 34, True)  # 数字128, 256, 512
+                    value_text  = self.font.render(str(value), True, self.nums_color[value])
+                    self.form.blit(value_text, (x + 15, y + 120))
+                else:
+                    self.font   = pygame.font.SysFont('simsunnsimsun', 28, True)  # 数字1024, 2048
+                    value_text  = self.font.render(str(value), True, self.nums_color[value])
+                    self.form.blit(value_text, (x + 5, y + 120))
+
+        # 新增数字
+        self.CreateNum()
+        
+        # 如果游戏结束
+        self.is_over = self.JudgeGameOver()
+        if self.is_over:
+            over_font       = pygame.font.SysFont('simsunnsimsun', 60, True)
+            str_text        = over_font.render('Game Over!', True, (255,255,255))
+            self.form.blit(str_text, (30,220))
+            
+        # 如果游戏胜利
+        self.is_success = self.JudgeGameSuccess()
+        if self.is_success:
+            success_font    = pygame.font.SysFont('simsunnsimsun', 60, True)
+            str_text        = success_font.render('Success!', True, (178,34,34))
+            self.form.blit(str_text, (10,220))
+            
